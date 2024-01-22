@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Map1/Status1
       Splitter Ratio: 0.5
     Tree Height: 1298
   - Class: rviz_common/Selection
@@ -33,7 +34,7 @@ Visualization Manager:
       Cell Size: 1
       Class: rviz_default_plugins/Grid
       Color: 160; 160; 164
-      Enabled: true
+      Enabled: false
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -46,7 +47,7 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -90,6 +91,8 @@ Visualization Manager:
           Value: true
         laser:
           Value: true
+        map:
+          Value: true
         odom:
           Value: true
       Marker Scale: 1
@@ -98,6 +101,8 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
+        map:
+          {}
         odom:
           base_link:
             laser:
@@ -144,13 +149,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: ""
+        Value: map
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: ""
+        Value: map_updates
       Use Timestamp: false
       Value: true
     - Alpha: 1
@@ -191,7 +196,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -234,25 +239,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 12.987853050231934
+      Distance: 156.19790649414062
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.7494161128997803
-        Y: -9.674423217773438
-        Z: 0.6745132207870483
+        X: 46.41301727294922
+        Y: 9.08289623260498
+        Z: -0.5982593297958374
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4997963905334473
+      Pitch: 1.1447968482971191
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.125386118888855
+      Yaw: 4.468568325042725
     Saved: ~
 Window Geometry:
   Displays:
