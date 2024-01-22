@@ -7,10 +7,12 @@
     <node pkg="nav2_map_server" exec="map_server" name="map_server" output="screen">
         <param name="yaml_filename" value="src/worlds/src/cappero/cappero_laser_odom_diag.yaml"/>
     </node>
-    <executable cmd="static_transform_publisher --frame-id map --child-frame-id odom" cwd="/home" launch-prefix="ros2 run tf2_ros" output="screen"/>
+    <node pkg="nav2_amcl" exec="amcl" name="amcl" output="screen">
+        <param from="src/configuration/src/amcl.yaml"/>
+    </node>
     <node pkg="nav2_lifecycle_manager" exec="lifecycle_manager" name="lifecycle_manager" output="screen">
         <param name="autostart" value="true"/>
-        <param name="node_names" value="[map_server]"/>
+        <param name="node_names" value="['map_server', 'amcl']"/>
     </node>
         
     <node pkg="teleop_twist_keyboard" exec="teleop_twist_keyboard" name="keyboard_controls" output="screen" launch-prefix="gnome-terminal --" />
