@@ -30,7 +30,7 @@ ros2 launch src/configuration/launch/launch_all.xml
 ## Commands to run each node individually:
 ### stage_ros2
 ```bash
-ros2 run stage_ros2 stage_ros2 --ros-args -p world_file:=worlds/cappero_laser_odom_diag.world
+ros2 run stage_ros2 stage_ros2 --ros-args -p world_file:=src/worlds/src/cappero/cappero_laser_odom_diag.world
 ```
 ### keyboard controller
 ```bash
@@ -41,6 +41,8 @@ It published ```geometry_msgs/msg/Twist``` messages in the ```/cmd_vel``` topic.
 ### map_server
 ```bash
 ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=src/worlds/src/cappero/cappero_laser_odom_diag.yaml
+
+ros2 run nav2_util lifecycle_bringup map_server
 ```
 
 to publish a static tf map->odom: 
