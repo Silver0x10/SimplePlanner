@@ -1,10 +1,15 @@
 <launch>
     <node pkg="stage_ros2" exec="stage_ros2" name="stage">
-        <param name="world_file" value="src/worlds/cappero/cappero_laser_odom_diag.world"/>
+        <param name="world_file" value="src/worlds/src/cappero/cappero_laser_odom_diag.world"/>
     </node>
-    <!-- <node pkg="nav2_map_server" exec="map_server" name="map_server" output="screen">
-        <param name="yaml_filename" value="worlds/cappero_laser_odom_diag.yaml"/>
-    </node> -->
+
+    <node pkg="nav2_map_server" exec="map_server" name="map_server" output="screen">
+        <param name="yaml_filename" value="src/worlds/src/cappero/cappero_laser_odom_diag.yaml"/>
+    </node>
+    <executable cmd="set /map_server configure" cwd="/home" launch-prefix="ros2 lifecycle" output="screen"/>
+    <executable cmd="set /map_server activate" cwd="/home" launch-prefix="ros2 lifecycle" output="screen"/>
+    <executable cmd="static_transform_publisher --frame-id map --child-frame-id odom" cwd="/home" launch-prefix="ros2 run tf2_ros" output="screen"/>
+
     <node pkg="teleop_twist_keyboard" exec="teleop_twist_keyboard" name="keyboard_controls" output="screen" launch-prefix="gnome-terminal --" />
     <node pkg="rqt_graph" exec="rqt_graph" />
     <node pkg="rviz2" exec="rviz2" args="-d src/configuration/src/visualization.rviz"/>
