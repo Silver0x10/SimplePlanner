@@ -36,3 +36,4 @@ build
 install
 log
 src/dmap_live_registration
+*__pycache__
