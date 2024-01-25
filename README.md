@@ -59,7 +59,22 @@ ros2 run tf2_ros static_transform_publisher --frame-id map --child-frame-id odo
 ros2 run nav2_amcl amcl --ros-args --params-file src/configuration/src/amcl.yaml
 ```
 
-## lifecycle manager
+### path planner
+```bash
+ros2 run nav2_planner planner_server --ros-args --params-file ./planner_server.yaml
+```
+
+### path execution
+```bash
+ros2 run nav2_controller controller_server --ros-args --params-file ./controller_server.yaml
+```
+
+### bt navigator
+```bash
+ros2 run nav2_bt_navigator bt_navigator --ros-args --params-file bt_navigator.yaml
+```
+
+### lifecycle manager
 ```bash
 ros2 run nav2_util lifecycle_bringup --ros-args -p node_names:=[map_server, amcl] -p autostart:=true
 ```

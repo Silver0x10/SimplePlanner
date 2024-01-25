@@ -10,9 +10,19 @@
     <node pkg="nav2_amcl" exec="amcl" name="amcl" output="screen">
         <param from="src/configuration/src/amcl.yaml"/>
     </node>
+    <!-- <node pkg="nav2_planner" exec="planner_server" name="planner_server" output="screen">
+        <param from="src/configuration/src/all_params.yaml"/>
+    </node>
+    <node pkg="nav2_controller" exec="controller_server" name="controller_server" output="screen">
+        <param from="src/configuration/src/all_params.yaml"/>
+    </node>
+    <node pkg="nav2_bt_navigator" exec="bt_navigator" name="bt_navigator" output="screen">
+        <param from="src/configuration/src/all_params.yaml"/>
+    </node> -->
     <node pkg="nav2_lifecycle_manager" exec="lifecycle_manager" name="lifecycle_manager" output="screen">
         <param name="autostart" value="true"/>
         <param name="node_names" value="['map_server', 'amcl']"/>
+        <!-- <param name="node_names" value="['map_server', 'amcl', 'planner_server', 'controller_server, 'bt_navigator']"/> -->
     </node>
         
     <node pkg="teleop_twist_keyboard" exec="teleop_twist_keyboard" name="keyboard_controls" output="screen" launch-prefix="gnome-terminal --" />
