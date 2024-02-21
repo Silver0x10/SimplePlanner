@@ -12,9 +12,10 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 add_executable(simple_planner src/simple_planner.cpp)
-ament_target_dependencies(simple_planner rclcpp geometry_msgs std_msgs)
+ament_target_dependencies(simple_planner rclcpp geometry_msgs std_msgs nav_msgs)
 
 target_include_directories(simple_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
