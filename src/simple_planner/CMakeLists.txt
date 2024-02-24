@@ -15,8 +15,13 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 add_executable(simple_planner src/simple_planner.cpp)
-ament_target_dependencies(simple_planner rclcpp geometry_msgs std_msgs nav_msgs tf2_ros)
+ament_target_dependencies(simple_planner rclcpp geometry_msgs std_msgs nav_msgs tf2_ros OpenCV)
+
+target_link_libraries(simple_planner ${OpenCV_LIBRARIES})
 
 target_include_directories(simple_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
