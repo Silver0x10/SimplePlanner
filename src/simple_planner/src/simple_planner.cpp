@@ -9,6 +9,8 @@
 #include "tf2_ros/buffer.h"
 #include <opencv2/opencv.hpp>
 
+#include "search.hpp"
+
 using namespace std;
 using namespace std::chrono_literals;
 
@@ -17,7 +19,7 @@ class SimplePlanner : public rclcpp::Node {
     private:
     
         rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr sub_goal_;
-        geometry_msgs::msg::PoseStamped goal;
+        geometry_msgs::msg::PoseStamped goal_;
         rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr sub_map_;
         nav_msgs::msg::OccupancyGrid map_;
         geometry_msgs::msg::TransformStamped robot_pose_;
@@ -32,6 +34,8 @@ class SimplePlanner : public rclcpp::Node {
 
         void goal_received_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
             printf("goal received\n");
+            goal_.header = msg->header;
+            goal_.pose = msg->pose;
             RCLCPP_INFO(this->get_logger(), "I heard the goal pose: '%f %f %f'", msg->pose.position.x, msg->pose.position.y, msg->pose.position.z);
 
             std::string source_frame = "map";
@@ -49,6 +53,34 @@ class SimplePlanner : public rclcpp::Node {
             }
             robot_pose_ = tf_buffer_->lookupTransform(source_frame, target_frame, tf2::TimePointZero);
             RCLCPP_INFO(this->get_logger(), "I heard the robot pose: '%f %f %f'", robot_pose_.transform.translation.x, robot_pose_.transform.translation.y, robot_pose_.transform.translation.z);
+
+            int robot_col = int( robot_pose_.transform.translation.x / map_.info.resolution );
+            int robot_row = map_.info.height - int( robot_pose_.transform.translation.y / map_.info.resolution ) - 1;
+            int robot_vector_index = (map_.info.height - robot_row - 1) * map_.info.width + robot_col;
+            planner::Node root_node(robot_row, robot_col, 1, robot_vector_index, nullptr);
+            
+            int goal_col = int( goal_.pose.position.x / map_.info.resolution );
+            int goal_row = map_.info.height - int( goal_.pose.position.y / map_.info.resolution ) - 1;
+            int goal_vector_index = (map_.info.height - goal_row - 1) * map_.info.width + goal_col;
+            planner::Node goal_node(goal_row, goal_col, 1, goal_vector_index, nullptr);
+
+            // cout << root_node.col << " " << goal_node.col << endl;
+
+            cv::Mat distance_map(map_.info.height, map_.info.width, CV_32S, cv::Scalar(0));
+            for(unsigned int col = 0; col < map_.info.width; col++) {
+                for(unsigned int row = 0; row < map_.info.height; row++) {
+                    int i = (map_.info.height - row - 1) * map_.info.width + col; // row_major starting from the bottom left corner
+                    if(map_.data[i] == 0) { // free space
+                        distance_map.at<int>(row, col) = 1;
+                    }
+                }
+            }
+
+            planner::Node reached_node = planner::search(root_node, goal_node, distance_map);
+            cout << "start row: " << root_node.row << "\tcol: " << root_node.col << endl;
+            cout << "reached row: " << reached_node.row << "\tcol: " << reached_node.col << endl;
+            cout << "desired row: " << goal_node.row << "\tcol: " << goal_node.col << endl;
+
             save_map();
         }
 
