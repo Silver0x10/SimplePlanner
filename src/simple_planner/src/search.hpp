@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <queue>
 #include <set>
+#include "nav_msgs/msg/occupancy_grid.hpp"
 
 using namespace std;
 
@@ -22,6 +23,8 @@ namespace planner {
 
     bool in_bounds(cv::Mat map, int row, int col);
 
-    Node search(Node root, Node goal, cv::Mat map);
+    cv::Mat compute_costmap(const nav_msgs::msg::OccupancyGrid& map);
+
+    Node search(Node root, Node goal, cv::Mat distance_map);
 
 }
