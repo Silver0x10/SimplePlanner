@@ -59,12 +59,14 @@ class SimplePlanner : public rclcpp::Node {
             int robot_col = int( robot_pose_.transform.translation.x / map_.info.resolution );
             int robot_row = map_.info.height - int( robot_pose_.transform.translation.y / map_.info.resolution ) - 1;
             int robot_vector_index = (map_.info.height - robot_row - 1) * map_.info.width + robot_col;
-            planner::Node root_node(robot_row, robot_col, 1, robot_vector_index, nullptr);
+            int robot_closest_object_distance = distance_map_.at<int>(robot_row, robot_col);
+            planner::Node root_node(robot_row, robot_col, 1, robot_vector_index, robot_closest_object_distance);
             
             int goal_col = int( goal_.pose.position.x / map_.info.resolution );
             int goal_row = map_.info.height - int( goal_.pose.position.y / map_.info.resolution ) - 1;
             int goal_vector_index = (map_.info.height - goal_row - 1) * map_.info.width + goal_col;
-            planner::Node goal_node(goal_row, goal_col, 1, goal_vector_index, nullptr);
+            int goal_closest_object_distance = distance_map_.at<int>(goal_row, goal_col);
+            planner::Node goal_node(goal_row, goal_col, 1, goal_vector_index, goal_closest_object_distance);
 
             planner::Node reached_node = planner::search(root_node, goal_node, distance_map_);
             cout << "start row: " << root_node.row << "\tcol: " << root_node.col << endl;

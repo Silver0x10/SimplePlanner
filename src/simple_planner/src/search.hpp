@@ -12,13 +12,18 @@ namespace planner {
         public:
             int row;
             int col;
-            int cost;
+            int steps;
             int vector_index;
+            int closest_object_distance;
             Node* parent;
 
-            Node(int row, int col, int cost, int vector_index, Node* parent = nullptr);
+            Node(int row, int col, int steps, int vector_index, int closest_object_distance, Node* parent = nullptr);
 
             bool equals(const Node& other) const;
+    };
+
+    struct NodeComparator {
+        bool operator()(Node* node_1, Node* node_2);
     };
 
     bool in_bounds(cv::Mat map, int row, int col);

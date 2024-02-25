@@ -4,10 +4,15 @@ using namespace std;
 
 namespace planner {
 
-    Node::Node(int row, int col, int cost, int vector_index, Node* parent) : row(row), col(col), cost(cost), vector_index(vector_index), parent(parent) {}
+    Node::Node(int row, int col, int steps, int vector_index, int closest_object_distance, Node* parent) : row(row), col(col), steps(steps), vector_index(vector_index), closest_object_distance(closest_object_distance), parent(parent) {}
 
     bool Node::equals(const Node& other) const {
-        return this->row == other.row and this->col == other.col; // and this->cost == other.cost;
+        return this->row == other.row and this->col == other.col; // and this->steps == other.steps;
+    }
+
+    bool NodeComparator::operator()(Node* node_1, Node* node_2) {
+        if(node_1->closest_object_distance != node_2->closest_object_distance) return node_1->closest_object_distance < node_2->closest_object_distance;
+        return node_1->steps > node_2->steps;
     }
 
 
@@ -81,7 +86,7 @@ namespace planner {
         Node* current = goal.parent;
         cout << "start" << endl;
         while (current != nullptr) {
-            // cout << current->cost << "\t" << current->row << "\t" << current->col << endl;
+            // cout << current->steps << "\t" << current->row << "\t" << current->col << endl;
             map_image.at<cv::Vec3b>(current->row, current->col) = cv::Vec3b(0, 195, 255);
             current = current->parent;
         }
@@ -94,12 +99,12 @@ namespace planner {
 
     Node search(Node root, Node goal, cv::Mat distance_map) {
         vector<pair<int, int>> movements = { {-1, 0}, {1, 0},  {0, -1}, {0, 1} };
-        queue<Node*> frontier;
+        priority_queue<Node*, vector<Node*>, NodeComparator> frontier;
         vector<vector<bool>> visited(distance_map.rows, vector<bool>(distance_map.cols, false));
         frontier.push(&root);
         visited[root.row][root.col] = true;
         while(!frontier.empty()) {
-            Node* current = frontier.front();
+            Node* current = frontier.top();
             frontier.pop();
             if(current->equals(goal)) {
                 save_explored_nodes(distance_map, visited, root, *current);
@@ -109,9 +114,10 @@ namespace planner {
                 int n_row = current->row + move.first;
                 int n_col = current->col + move.second;
                 if( in_bounds(distance_map, n_row, n_col) and distance_map.at<int>(n_row, n_col) != 0) {
-                    if( not visited[n_row][n_col] ) { 
+                    if( not visited[n_row][n_col] ) { // check om the cost not included since the distance from the nearest obstable (which we use as cost) doesn't change
                         int vector_index = (distance_map.rows - n_row - 1) * distance_map.cols + n_col;
-                        Node* child = new Node(n_row, n_col, current->cost+1, vector_index, current);
+                        int closest_object_distance = distance_map.at<int>(n_row, n_col);
+                        Node* child = new Node(n_row, n_col, current->steps+1, vector_index, closest_object_distance, current);
                         frontier.push(child);
                         visited[n_row][n_col] = true;
                     }
