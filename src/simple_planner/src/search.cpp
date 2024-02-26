@@ -22,6 +22,18 @@ namespace planner {
     }
 
 
+    void save_distance_map(cv::Mat distance_map) {
+        cv::Mat distance_map_image(distance_map.rows, distance_map.cols, CV_8UC3, cv::Scalar(0, 0, 0)); // BGR
+
+        for(auto i=0; i < distance_map.rows; i++) {
+            for(auto j=0; j < distance_map.cols; j++) {
+                // distance_map_image.at<cv::Vec3b>(i, j) = cv::Vec3b(10, 10, 0);
+                distance_map_image.at<cv::Vec3b>(i, j) = cv::Vec3b(distance_map.at<int>(i, j)*5, distance_map.at<int>(i, j)*5, 0);
+            }
+        }
+        cv::imwrite("distance_map.png", distance_map_image);
+    }
+
     cv::Mat compute_costmap(const nav_msgs::msg::OccupancyGrid& map) { // simple BFS starting from obstacles
         cv::Mat distance_map(map.info.height, map.info.width, CV_32S, cv::Scalar(255));
         queue<pair<int, int>*> frontier;
@@ -29,19 +41,15 @@ namespace planner {
         for(unsigned int col = 0; col < map.info.width; col++) {
             for(unsigned int row = 0; row < map.info.height; row++) {
                 int i = (map.info.height - row - 1) * map.info.width + col; // row_major starting from the bottom left corner
-                if(map.data[i] == 100) {
+                if(map.data[i] == 100) { // occupied cells
                     distance_map.at<int>(row, col) = 0;
                     pair<int, int>* obstacle_coords = new pair<int, int>(row, col);
                     frontier.push(obstacle_coords);
                     visited[row][col] = true;
-                } else if(map.data[i] == -1){
+                } else if(map.data[i] == -1) { // unknown cells
                     distance_map.at<int>(row, col) = 0;
                     visited[row][col] = true;
                 }
-
-                // if(map.data[i] == 0) { // free space
-                //     distance_map.at<int>(row, col) = 1;
-                // }
             }
         }
 
@@ -63,6 +71,8 @@ namespace planner {
             }
         }
 
+        save_distance_map(distance_map);
+
         return distance_map;
     }
 
@@ -78,9 +88,6 @@ namespace planner {
                 } else if(visited[row][col]) {
                     map_image.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 255, 0);
                 }
-                // TODO save in the distance_map init
-                // to show the costmap
-                // map_image.at<cv::Vec3b>(row, col) = cv::Vec3b(map.at<int>(row,col)*5, map.at<int>(row,col)*5, 0);
             }
         }
         map_image.at<cv::Vec3b>(goal.row, goal.col) = cv::Vec3b(255, 0, 0);
@@ -92,7 +99,7 @@ namespace planner {
         }
         map_image.at<cv::Vec3b>(root.row, root.col) = cv::Vec3b(0, 0, 255);
 
-        cv::imwrite("visited.png", map_image);
+        cv::imwrite("visited_area.png", map_image);
     }
 
 
