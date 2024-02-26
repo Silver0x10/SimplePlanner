@@ -4,6 +4,7 @@ using namespace std;
 
 namespace planner {
 
+    Node::Node() : row(0), col(0), steps(0), vector_index(0), closest_object_distance(0), parent(nullptr) {}
     Node::Node(int row, int col, int steps, int vector_index, int closest_object_distance, Node* parent) : row(row), col(col), steps(steps), vector_index(vector_index), closest_object_distance(closest_object_distance), parent(parent) {}
 
     bool Node::equals(const Node& other) const {
@@ -84,20 +85,18 @@ namespace planner {
         }
         map_image.at<cv::Vec3b>(goal.row, goal.col) = cv::Vec3b(255, 0, 0);
         Node* current = goal.parent;
-        cout << "start" << endl;
         while (current != nullptr) {
             // cout << current->steps << "\t" << current->row << "\t" << current->col << endl;
             map_image.at<cv::Vec3b>(current->row, current->col) = cv::Vec3b(0, 195, 255);
             current = current->parent;
         }
-        cout << "stop" << endl;
         map_image.at<cv::Vec3b>(root.row, root.col) = cv::Vec3b(0, 0, 255);
 
         cv::imwrite("visited.png", map_image);
     }
 
 
-    Node search(Node root, Node goal, cv::Mat distance_map) {
+    Node search(Node& root, Node& goal, cv::Mat distance_map) {
         vector<pair<int, int>> movements = { {-1, 0}, {1, 0},  {0, -1}, {0, 1} };
         priority_queue<Node*, vector<Node*>, NodeComparator> frontier;
         vector<vector<bool>> visited(distance_map.rows, vector<bool>(distance_map.cols, false));

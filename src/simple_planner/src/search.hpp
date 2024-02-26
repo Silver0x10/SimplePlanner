@@ -17,6 +17,7 @@ namespace planner {
             int closest_object_distance;
             Node* parent;
 
+            Node();
             Node(int row, int col, int steps, int vector_index, int closest_object_distance, Node* parent = nullptr);
 
             bool equals(const Node& other) const;
@@ -30,6 +31,6 @@ namespace planner {
 
     cv::Mat compute_costmap(const nav_msgs::msg::OccupancyGrid& map);
 
-    Node search(Node root, Node goal, cv::Mat distance_map);
+    Node search(Node& root, Node& goal, cv::Mat distance_map);
 
 }
