@@ -27,4 +27,6 @@
         
     <node pkg="teleop_twist_keyboard" exec="teleop_twist_keyboard" name="keyboard_controls" output="screen" launch-prefix="gnome-terminal --" />
     <node pkg="rqt_graph" exec="rqt_graph" />
+
+    <node pkg="simple_planner" exec="simple_planner" name="simple_planner" output="screen" /> 
 </launch>
