@@ -36,6 +36,7 @@ class SimplePlanner : public rclcpp::Node {
 
         rclcpp::TimerBase::SharedPtr path_timer_;
         rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_publisher_;
+        nav_msgs::msg::Path path_;
 
         void goal_received_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
             goal_.header = msg->header;
@@ -75,6 +76,25 @@ class SimplePlanner : public rclcpp::Node {
             reached_node_ = planner::search(root_node, goal_node, distance_map_);
             if(reached_node_.equals(goal_node)) RCLCPP_INFO(this->get_logger(), "Path computed :)");
             else RCLCPP_INFO(this->get_logger(), "The goal cannot be reached :(");
+
+            path_.header.frame_id = "map";
+            path_.poses.clear();
+            vector<planner::Node*> path_nodes;
+            path_nodes.push_back(&reached_node_);
+            planner::Node* current = reached_node_.parent;
+            while(current != nullptr) {
+                path_nodes.push_back(current);
+                current = current->parent;
+            }
+            for(auto i=path_nodes.rbegin(); i!=path_nodes.rend(); ++i) {
+                geometry_msgs::msg::PoseStamped pose_msg;
+                pose_msg.header.stamp = this->now();
+                pose_msg.header.frame_id = "base_link";
+                auto& node = *i;
+                pose_msg.pose.position.x = node->col * map_.info.resolution;
+                pose_msg.pose.position.y = (map_.info.height - 1 - node->row ) * map_.info.resolution;
+                path_.poses.push_back(pose_msg);
+            }
         }
 
         void map_received_callback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg) {
@@ -86,28 +106,8 @@ class SimplePlanner : public rclcpp::Node {
         }
 
         void path_timer_callback() {
-            nav_msgs::msg::Path msg;
-            msg.header.stamp = this->now();
-            msg.header.frame_id = "map";
-
-            vector<planner::Node*> path_nodes;
-            path_nodes.push_back(&reached_node_);
-            planner::Node* current = reached_node_.parent;
-            while(current != nullptr) {
-                path_nodes.push_back(current);
-                current = current->parent;
-            }
-            
-            for(auto i=path_nodes.rbegin(); i!=path_nodes.rend(); ++i) {
-                geometry_msgs::msg::PoseStamped pose_msg;
-                pose_msg.header.stamp = this->now();
-                pose_msg.header.frame_id = "base_link";
-                auto& node = *i;
-                pose_msg.pose.position.x = node->col * map_.info.resolution;
-                pose_msg.pose.position.y = (map_.info.height - 1 - node->row ) * map_.info.resolution;
-                msg.poses.push_back(pose_msg);
-            }
-            path_publisher_->publish(msg);
+            path_.header.stamp = this->now();
+            path_publisher_->publish(path_);
         }
 
     public:
