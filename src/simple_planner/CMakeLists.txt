@@ -18,7 +18,7 @@ find_package(tf2_ros REQUIRED)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(simple_planner src/simple_planner.cpp src/search.cpp)
+add_executable(simple_planner src/simple_planner.cpp src/search.cpp src/distance_map.cpp src/utils.cpp)
 ament_target_dependencies(simple_planner rclcpp geometry_msgs std_msgs nav_msgs tf2_ros OpenCV)
 
 target_link_libraries(simple_planner ${OpenCV_LIBRARIES})

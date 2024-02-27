@@ -1,7 +1,7 @@
-#include <cstdio>
 #include <chrono>
-#include <stdio.h>
+#include <iostream>
 #include <vector>
+#include <opencv2/opencv.hpp>
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
@@ -9,9 +9,9 @@
 #include "nav_msgs/msg/path.hpp"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/buffer.h"
-#include <opencv2/opencv.hpp>
 
 #include "search.hpp"
+#include "distance_map.hpp"
 
 using namespace std;
 using namespace std::chrono_literals;
@@ -42,8 +42,8 @@ class SimplePlanner : public rclcpp::Node {
             goal_.pose = msg->pose;
             RCLCPP_INFO(this->get_logger(), "I heard the goal pose: '%f %f %f'", msg->pose.position.x, msg->pose.position.y, msg->pose.position.z);
 
-            std::string source_frame = "map";
-            std::string target_frame = "base_link";
+            string source_frame = "map";
+            string target_frame = "base_link";
             
             int attempt = 0;
             while(!tf_buffer_->canTransform(target_frame, source_frame, tf2::TimePointZero)) {
@@ -70,8 +70,8 @@ class SimplePlanner : public rclcpp::Node {
             int goal_closest_object_distance = distance_map_.at<int>(goal_row, goal_col);
             planner::Node goal_node(goal_row, goal_col, -1, goal_vector_index, goal_closest_object_distance);
 
-            RCLCPP_INFO(this->get_logger(), "START map position --> row: %d\tcol: %d", root_node.row, root_node.col);
-            RCLCPP_INFO(this->get_logger(), "GOAL  map position --> row: %d\tcol: %d", goal_node.row, goal_node.col);
+            RCLCPP_INFO(this->get_logger(), "START map coords --> row: %d\t col: %d", root_node.row, root_node.col);
+            RCLCPP_INFO(this->get_logger(), "GOAL  map coords --> row: %d\t col: %d", goal_node.row, goal_node.col);
             reached_node_ = planner::search(root_node, goal_node, distance_map_);
             if(reached_node_.equals(goal_node)) RCLCPP_INFO(this->get_logger(), "Path computed :)");
             else RCLCPP_INFO(this->get_logger(), "The goal cannot be reached :(");
@@ -80,8 +80,8 @@ class SimplePlanner : public rclcpp::Node {
         void map_received_callback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg) {
             map_.header = msg->header;
             map_.info = msg->info;
-            map_.data = msg->data;
-            distance_map_ = planner::compute_costmap(map_);
+            map_.data = msg->data; // data is row_major ordered starting from the bottom left corner
+            distance_map_ = planner::compute_distance_map(map_);
             RCLCPP_INFO(this->get_logger(), "I heard the map: w:%d h:%d resolution:%f'", msg->info.width, msg->info.height, msg->info.resolution);
         }
 
@@ -98,14 +98,13 @@ class SimplePlanner : public rclcpp::Node {
                 current = current->parent;
             }
             
-            int path_len = path_nodes.size();
-            // // for(auto i=path_nodes.rbegin(); i!=path_nodes.rend(); ++i) {
-            for(auto i=0; i<path_len; ++i) {
+            for(auto i=path_nodes.rbegin(); i!=path_nodes.rend(); ++i) {
                 geometry_msgs::msg::PoseStamped pose_msg;
                 pose_msg.header.stamp = this->now();
                 pose_msg.header.frame_id = "base_link";
-                pose_msg.pose.position.x = path_nodes[path_len-1 - i]->col * map_.info.resolution;
-                pose_msg.pose.position.y = (map_.info.height - 1 - path_nodes[path_len-1 - i]->row ) * map_.info.resolution;
+                auto& node = *i;
+                pose_msg.pose.position.x = node->col * map_.info.resolution;
+                pose_msg.pose.position.y = (map_.info.height - 1 - node->row ) * map_.info.resolution;
                 msg.poses.push_back(pose_msg);
             }
             path_publisher_->publish(msg);
