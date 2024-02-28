@@ -3,8 +3,8 @@
 <package format="3">
   <name>simple_planner</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="silverio.manganaro@gmail.com">silver</maintainer>
+  <description>Dijkstra-based planner</description>
+  <maintainer email="silverio.manganaro@gmail.com">silver0x10</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
